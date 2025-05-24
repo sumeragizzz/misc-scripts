@@ -1,0 +1,3 @@
+2025-05-24 16:02:33,994 WARNING  warning log message
+2025-05-24 16:02:33,995 ERROR    error log message
+2025-05-24 16:02:33,995 CRITICAL critical log message
