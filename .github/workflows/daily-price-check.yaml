@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: pip install -r src/anatae/requirements.txt
@@ -27,4 +27,4 @@ jobs:
         run: playwright install
 
       - name: Run Python script
-        run: python src/anatae/price_check.py
+        run: python -m src.anatae.price_check
