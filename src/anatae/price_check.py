@@ -20,7 +20,7 @@ def check_price(item_page_url: str) -> tuple[str, int]:
 
             # タイトルを取得
             title: str = page.locator("h1").text_content().strip()
-            logger.info(f"title: {title}")
+            logger.debug(f"title: {title}")
 
             # 価格を取得する
             # 「合計」要素の兄弟要素を取得する
@@ -35,7 +35,7 @@ def check_price(item_page_url: str) -> tuple[str, int]:
                     match = re.search(r"\d[\d,]*\.?\d*", text)
                     if match:
                         price = int(match.group().replace(",", ""))
-                        logger.info(f"price: {price}")
+                        logger.debug(f"price: {price}")
                         return (title, price)
 
             # 価格を抽出できない場合はエラーとする
@@ -46,7 +46,7 @@ def check_price(item_page_url: str) -> tuple[str, int]:
 def notify_discord(notify_webhook_url: str, price_info: tuple[str, int]) -> None:
     # メッセージ作成
     payload = {
-        "content": f"title: {price_info[0]}, price: {price_info[1]}"
+        "content": f"\\{price_info[1]:,} {price_info[0]}"
     }
 
     # メッセージ送信
