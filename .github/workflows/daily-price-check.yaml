@@ -1,0 +1,27 @@
+name: Daily price check
+
+on:
+  schedule:
+    - cron: '00 15 * * *'  # JST 00:00
+  workflow_dispatch:
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    env:
+      ITEM_PAGE_URL: ${{ secrets.ITEM_PAGE_URL }}
+      NOTIFY_WEBHOOK_URL: ${{ secrets.NOTIFY_WEBHOOK_URL }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: pip install -r src/anatae/requirements.txt
+
+      - name: Run Python script
+        run: python src/anatae/price_check.py
