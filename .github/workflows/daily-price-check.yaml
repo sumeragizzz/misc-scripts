@@ -23,5 +23,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r src/anatae/requirements.txt
 
+      - name: Install Playwright browsers
+        run: playwright install
+
       - name: Run Python script
         run: python src/anatae/price_check.py
