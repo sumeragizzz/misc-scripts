@@ -17,6 +17,7 @@ def check_price(item_page_url: str) -> tuple[str, int]:
             # サイトにアクセス
             page = browser.new_page()
             page.goto(item_page_url)
+            page.locator("span", has_text="合計").first.wait_for()
 
             # タイトルを取得
             title: str = page.locator("h1").text_content().strip()
