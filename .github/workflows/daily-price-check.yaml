@@ -4,11 +4,16 @@ on:
   schedule:
     - cron: '00 15 * * *'  # JST 00:00
   workflow_dispatch:
-
+    inputs:
+      log_level:
+        description: 'Log level (DEBUG, INFO, WARNING, ERROR)'
+        required: false
+        default: 'INFO'
 jobs:
   run-script:
     runs-on: ubuntu-latest
     env:
+      LOG_LEVEL: ${{github.event.inputs.log_level}}
       ITEM_PAGE_URL: ${{ secrets.ITEM_PAGE_URL }}
       NOTIFY_WEBHOOK_URL: ${{ secrets.NOTIFY_WEBHOOK_URL }}
     steps:

@@ -66,11 +66,12 @@ def main(args: argparse.Namespace) -> None:
     notify_discord(notify_webhook_url, price_info)
 
 if __name__ == "__main__":
-    logging.basicConfig(format="%(asctime)s %(levelname)-8s %(message)s", level=logging.INFO)
+    load_dotenv()
+
+    log_level = getattr(logging, os.environ.get("LOG_LEVEL", "INFO").upper(), logging.INFO)
+    logging.basicConfig(format="%(asctime)s %(levelname)-8s %(message)s", level=log_level)
 
     parser: argparse.ArgumentParser = argparse.ArgumentParser(description="check price")
     args: argparse.Namespace = parser.parse_args()
-
-    load_dotenv()
 
     main(args)
