@@ -28,9 +28,11 @@ def check_price(item_page_url: str) -> tuple[str, int]:
             total_label = page.locator("span", has_text="合計").first
             parent_div = total_label.locator("xpath=..")
             spans = parent_div.locator("span").all()
+            logger.debug(f"span size: {len(spans)}")
             # 「¥」を含み、打消し線でないものを抽出
             for span in spans:
                 text = span.text_content().strip()
+                logger.debug(f"span text: {text}")
                 classes = span.get_attribute("class") or ""
                 if "¥" in text and "line-through" not in classes:
                     match = re.search(r"\d[\d,]*\.?\d*", text)
@@ -70,6 +72,7 @@ if __name__ == "__main__":
 
     log_level = getattr(logging, os.environ.get("LOG_LEVEL", "INFO").upper(), logging.INFO)
     logging.basicConfig(format="%(asctime)s %(levelname)-8s %(message)s", level=log_level)
+    logging.getLogger("urllib3").setLevel(max(log_level, logging.INFO))
 
     parser: argparse.ArgumentParser = argparse.ArgumentParser(description="check price")
     args: argparse.Namespace = parser.parse_args()
