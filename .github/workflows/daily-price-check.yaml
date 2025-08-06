@@ -19,8 +19,8 @@ jobs:
   run-script:
     runs-on: ubuntu-latest
     env:
-      LOG_LEVEL: ${{github.event.inputs.log_level}}
-      ITEM_PAGE_URL: ${{ secrets.ITEM_PAGE_URL }}
+      LOG_LEVEL: ${{ github.event.inputs.log_level }}
+      ITEM_PAGE_URL: ${{ vars.ITEM_PAGE_URLS }}
       NOTIFY_WEBHOOK_URL: ${{ secrets.NOTIFY_WEBHOOK_URL }}
     steps:
       - name: Checkout repository
