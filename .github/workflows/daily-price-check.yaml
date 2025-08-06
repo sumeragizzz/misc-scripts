@@ -2,7 +2,7 @@ name: Daily price check
 
 on:
   schedule:
-    - cron: '00 15 * * *'  # JST 00:00
+    - cron: '0 0 * * *' # JST 09:00
   workflow_dispatch:
     inputs:
       log_level:
