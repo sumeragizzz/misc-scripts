@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       LOG_LEVEL: ${{ github.event.inputs.log_level }}
-      ITEM_PAGE_URL: ${{ vars.ITEM_PAGE_URLS }}
+      ITEM_PAGE_URLS: ${{ vars.ITEM_PAGE_URLS }}
       NOTIFY_WEBHOOK_URL: ${{ secrets.NOTIFY_WEBHOOK_URL }}
     steps:
       - name: Checkout repository
