@@ -2,19 +2,25 @@ name: Daily price check
 
 on:
   schedule:
-    - cron: '00 15 * * *'  # JST 00:00
+    - cron: '0 0 * * *' # JST 09:00
   workflow_dispatch:
     inputs:
       log_level:
-        description: 'Log level (DEBUG, INFO, WARNING, ERROR)'
-        required: false
+        description: 'Log level'
+        required: true
         default: 'INFO'
+        type: choice
+        options:
+          - DEBUG
+          - INFO
+          - WARNING
+          - ERROR
 jobs:
   run-script:
     runs-on: ubuntu-latest
     env:
-      LOG_LEVEL: ${{github.event.inputs.log_level}}
-      ITEM_PAGE_URL: ${{ secrets.ITEM_PAGE_URL }}
+      LOG_LEVEL: ${{ github.event.inputs.log_level }}
+      ITEM_PAGE_URLS: ${{ vars.ITEM_PAGE_URLS }}
       NOTIFY_WEBHOOK_URL: ${{ secrets.NOTIFY_WEBHOOK_URL }}
     steps:
       - name: Checkout repository
