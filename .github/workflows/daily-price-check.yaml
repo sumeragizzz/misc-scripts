@@ -6,9 +6,15 @@ on:
   workflow_dispatch:
     inputs:
       log_level:
-        description: 'Log level (DEBUG, INFO, WARNING, ERROR)'
-        required: false
+        description: 'Log level'
+        required: true
         default: 'INFO'
+        type: choice
+        options:
+          - DEBUG
+          - INFO
+          - WARNING
+          - ERROR
 jobs:
   run-script:
     runs-on: ubuntu-latest
