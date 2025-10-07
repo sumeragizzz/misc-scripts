@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+"""
+price_check.py
+
+Webサイト anatae の特定ページの価格をチェックして、Discordへ通知を行う。
+"""
 
 import argparse
 import json
@@ -13,6 +18,17 @@ from playwright.sync_api import expect
 logger: logging.Logger = logging.getLogger(__name__)
 
 def check_price(browser, item_page_url: str) -> tuple[str, int, str]:
+    """
+    anataeのページの価格をチェックする。
+    Args:
+        browser: Playwrightのbrowser
+        item_page_url (str): チェック対象ページのURL
+    Returns:
+        tuple[str, int, str]: 価格情報[タイトル, 価格, URL]
+    Raises:
+        ValueError: ページから想定する情報を取得できない場合。
+    """
+
     logger.debug("item_page_url: %s", item_page_url)
     # サイトにアクセス
     page = browser.new_page()
@@ -49,6 +65,13 @@ def check_price(browser, item_page_url: str) -> tuple[str, int, str]:
     return (title, price, item_page_url)
 
 def notify_discord(notify_webhook_url: str, price_info: tuple[str, int, str]) -> None:
+    """
+    Discordへの通知を行う。
+    Args:
+        notify_webhook_url (str): 通知先 Webhook URL
+        price_info (tuple[str, int, str]): 価格情報[タイトル, 価格, URL]
+    """
+
     # メッセージ作成
     payload = {
         "embeds": [
@@ -66,6 +89,12 @@ def notify_discord(notify_webhook_url: str, price_info: tuple[str, int, str]) ->
     response.raise_for_status()
 
 def main(args: argparse.Namespace) -> None: # pylint: disable=unused-argument
+    """
+    メイン処理。
+    Args:
+        args (argparse.Namespace): コマンドラインパラメーター
+    """
+
     # 環境変数からURLを取得
     item_page_urls = json.loads(os.getenv("ITEM_PAGE_URLS"))
     notify_webhook_url = os.getenv("NOTIFY_WEBHOOK_URL")
