@@ -12,7 +12,8 @@ from playwright.sync_api import expect
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-def check_price(browser, item_page_url: str) -> tuple[str, int]:
+def check_price(browser, item_page_url: str) -> tuple[str, int, str]:
+    logger.debug(f"item_page_url: {item_page_url}")
     # サイトにアクセス
     page = browser.new_page()
     page.goto(item_page_url)
@@ -45,12 +46,19 @@ def check_price(browser, item_page_url: str) -> tuple[str, int]:
     # 価格を数値してタイトルとともに返却する
     price = int(match.group().replace(",", ""))
     logger.debug(f"price: {price}")
-    return (title, price)
+    return (title, price, item_page_url)
 
-def notify_discord(notify_webhook_url: str, price_info: tuple[str, int]) -> None:
+def notify_discord(notify_webhook_url: str, price_info: tuple[str, int, str]) -> None:
     # メッセージ作成
     payload = {
-        "content": f"\\{price_info[1]:,} {price_info[0]}"
+        "embeds": [
+            {
+                "title": f"{price_info[0]}",
+                "description": f"{price_info[1]:,}円",
+                "url": f"{price_info[2]}"
+            }
+
+        ]
     }
 
     # メッセージ送信
@@ -67,7 +75,7 @@ def main(args: argparse.Namespace) -> None:
         try:
             for item_page_url in item_page_urls:
                 # 価格情報を取得
-                price_info: tuple[str, int] = check_price(browser, item_page_url)
+                price_info: tuple[str, int, str] = check_price(browser, item_page_url)
                 # Discordで通知
                 notify_discord(notify_webhook_url, price_info)
         finally:
