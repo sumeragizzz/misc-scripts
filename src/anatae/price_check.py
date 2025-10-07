@@ -29,8 +29,8 @@ def check_price(browser, item_page_url: str) -> tuple[str, int, str]:
         ValueError: ページから想定する情報を取得できない場合。
     """
 
-    logger.debug("item_page_url: %s", item_page_url)
     # サイトにアクセス
+    logger.debug("item_page_url: %s", item_page_url)
     page = browser.new_page()
     page.goto(item_page_url)
 
@@ -76,11 +76,10 @@ def notify_discord(notify_webhook_url: str, price_info: tuple[str, int, str]) ->
     payload = {
         "embeds": [
             {
-                "title": f"{price_info[0]}",
+                "title": price_info[0],
                 "description": f"{price_info[1]:,}円",
-                "url": f"{price_info[2]}"
+                "url": price_info[2]
             }
-
         ]
     }
 
