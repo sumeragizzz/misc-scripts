@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+"""
+price_check.py
+
+Webサイト anatae の特定ページの価格をチェックして、Discordへ通知を行う。
+"""
 
 import argparse
 import json
@@ -12,8 +17,20 @@ from playwright.sync_api import expect
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-def check_price(browser, item_page_url: str) -> tuple[str, int]:
+def check_price(browser, item_page_url: str) -> tuple[str, int, str]:
+    """
+    anataeのページの価格をチェックする。
+    Args:
+        browser: Playwrightのbrowser
+        item_page_url (str): チェック対象ページのURL
+    Returns:
+        tuple[str, int, str]: 価格情報[タイトル, 価格, URL]
+    Raises:
+        ValueError: ページから想定する情報を取得できない場合。
+    """
+
     # サイトにアクセス
+    logger.debug("item_page_url: %s", item_page_url)
     page = browser.new_page()
     page.goto(item_page_url)
 
@@ -23,12 +40,12 @@ def check_price(browser, item_page_url: str) -> tuple[str, int]:
 
     # タイトルを取得
     title: str = page.locator("h1").text_content().strip()
-    logger.debug(f"title: {title}")
+    logger.debug("title: %s", title)
 
     # 価格を取得する
     # 「合計」要素の兄弟要素を取得する
     spans = total_label.locator("xpath=..").locator("span").all()
-    logger.debug(f"span size: {len(spans)}")
+    logger.debug("span size: %d", len(spans))
     if len(spans) < 4:
         raise ValueError("The website structure is unexpected")
 
@@ -37,27 +54,46 @@ def check_price(browser, item_page_url: str) -> tuple[str, int]:
 
     # カンマ区切り文字列を解析する
     text = spans[2].text_content().strip()
-    logger.debug(f"span text: {text}")
+    logger.debug("span text: %s", text)
     match = re.search(r"\d[\d,]*\.?\d*", text)
     if not match:
         raise ValueError("The price display is unexpected")
 
     # 価格を数値してタイトルとともに返却する
     price = int(match.group().replace(",", ""))
-    logger.debug(f"price: {price}")
-    return (title, price)
+    logger.debug("price: %d", price)
+    return (title, price, item_page_url)
 
-def notify_discord(notify_webhook_url: str, price_info: tuple[str, int]) -> None:
+def notify_discord(notify_webhook_url: str, price_info: tuple[str, int, str]) -> None:
+    """
+    Discordへの通知を行う。
+    Args:
+        notify_webhook_url (str): 通知先 Webhook URL
+        price_info (tuple[str, int, str]): 価格情報[タイトル, 価格, URL]
+    """
+
     # メッセージ作成
     payload = {
-        "content": f"\\{price_info[1]:,} {price_info[0]}"
+        "embeds": [
+            {
+                "title": price_info[0],
+                "description": f"{price_info[1]:,}円",
+                "url": price_info[2]
+            }
+        ]
     }
 
     # メッセージ送信
-    response = requests.post(notify_webhook_url, json=payload)
+    response = requests.post(notify_webhook_url, json=payload, timeout=10)
     response.raise_for_status()
 
-def main(args: argparse.Namespace) -> None:
+def main(args: argparse.Namespace) -> None: # pylint: disable=unused-argument
+    """
+    メイン処理。
+    Args:
+        args (argparse.Namespace): コマンドラインパラメーター
+    """
+
     # 環境変数からURLを取得
     item_page_urls = json.loads(os.getenv("ITEM_PAGE_URLS"))
     notify_webhook_url = os.getenv("NOTIFY_WEBHOOK_URL")
@@ -67,7 +103,7 @@ def main(args: argparse.Namespace) -> None:
         try:
             for item_page_url in item_page_urls:
                 # 価格情報を取得
-                price_info: tuple[str, int] = check_price(browser, item_page_url)
+                price_info: tuple[str, int, str] = check_price(browser, item_page_url)
                 # Discordで通知
                 notify_discord(notify_webhook_url, price_info)
         finally:
@@ -81,6 +117,6 @@ if __name__ == "__main__":
     logging.getLogger("urllib3").setLevel(max(log_level, logging.INFO))
 
     parser: argparse.ArgumentParser = argparse.ArgumentParser(description="check price")
-    args: argparse.Namespace = parser.parse_args()
+    parsed_args: argparse.Namespace = parser.parse_args()
 
-    main(args)
+    main(parsed_args)
